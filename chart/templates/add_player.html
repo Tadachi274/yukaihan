@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>参加者を追加</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>参加者を追加</h1>
+    <form action="{{ url_for('add_player') }}" method="post">
+        <label for="name">名前:</label>
+        <input type="text" name="name" required>
+        <br>
+        <label for="position">部署:</label>
+        <select id="position" name="position">
+            <option value="演出">演出</option>
+            <option value="舞台監督" selected>舞台監督</option>
+            <option value="制作">制作</option>
+            <option value="音響">音響</option>
+            <option value="照明">照明</option>
+            <option value="道具">道具</option>
+            <option value="衣装">衣装</option>
+            <option value="宣伝美術">宣伝美術</option>
+            <option value="広報">広報</option>
+            <option value="映像">映像</option>
+            <option value="新歓">新歓</option>
+        </select>
+        <br>
+        <label for="role">役：</label>
+        <input type="text" name="role" required>  <!-- nameをroleに修正 -->
+        <br>
+        <button type="submit">追加</button>
+    </form>
+    <br>
+    <a href="{{ url_for('index') }}">戻る</a>
+</body>
+</html>

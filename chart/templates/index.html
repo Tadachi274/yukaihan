@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>座組</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            background: #fff;
+            border-collapse: collapse;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a[href$="add_player"] {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a[href$="add_player"]:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>座組</h1>
+    <table border="1">
+        <tr>
+            <th>名前</th>
+            <th>部署</th>
+            <th>役</th>
+            <th>忙しさ</th>
+            <th>モチベ</th>
+        </tr>
+        {% for player in players %}
+        <tr>
+            <td>
+                <a href="{{ url_for('player_detail', player_id=player[0]) }}">
+                    <button>{{ player[1] }}</button>
+                </a>
+            </td>
+            <td>{{ player[2] }}</td>
+            <td>{{ player[3] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="{{ url_for('add_player') }}">選手を追加</a>
+</body>
+</html>
