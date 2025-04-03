@@ -79,6 +79,30 @@
         a:hover {
             text-decoration: underline;
         }
+
+        .chart-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .average-score {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .motivation-input {
+            margin-top: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +110,23 @@
     <p><strong>名前:</strong> {{ player[1] }}</p>
     <p><strong>部署:</strong> {{ player[2] }}</p>
 
-    <canvas id="radarChart"></canvas>
+    <div class="chart-container">
+        <canvas id="radarChart"></canvas>
+        <div>
+            <div class="average-score">
+                <h3>平均忙しさスコア</h3>
+                <div class="score" id="averageScore">-</div>
+            </div>
+            <div class="average-score">
+                <h3>モチベーション</h3>
+                <div class="motivation-input">
+                    <input type="range" id="motivation" min="0" max="100" value="{{ motivation }}">
+                    <div class="score" id="motivationScore">{{ motivation }}</div>
+                </div>
+                <button onclick="saveMotivation()">モチベを保存</button>
+            </div>
+        </div>
+    </div>
 
     <h2>忙しさ評価</h2>
     <form id="form">
@@ -195,9 +235,42 @@
               });
         });
 
+        // モチベーション値の表示を更新
+        document.getElementById('motivation').addEventListener('input', function(e) {
+            document.getElementById('motivationScore').textContent = e.target.value;
+        });
 
+        // モチベーションを保存
+        function saveMotivation() {
+            const motivation = document.getElementById('motivation').value;
+            const playerName = "{{ player[1] }}";
+
+            fetch("/save_motivation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: playerName,
+                    motivation: motivation
+                })
+            }).then(response => response.json())
+              .then(() => {
+                  alert("モチベーションを保存しました！");
+              });
+        }
 
         function updateChart(data) {
+            // 平均値を計算
+            const scores = [
+                parseFloat(data["部署"]),
+                parseFloat(data["役者"]),
+                parseFloat(data["大学"]),
+                parseFloat(data["他団体"]),
+                parseFloat(data["バイト"]),
+                parseFloat(data["その他"])
+            ];
+            const average = (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+            document.getElementById("averageScore").textContent = average;
+
             let ctx = document.getElementById("radarChart").getContext("2d");
             let chartData = {
                 labels: ["部署", "役者", "大学", "他団体", "バイト", "その他"],

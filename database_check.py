@@ -10,7 +10,7 @@ tables = cursor.fetchall()
 print("Tables:", tables)
 
 # 特定のテーブルの中身を取得
-cursor.execute("SELECT * FROM players;")
+cursor.execute("SELECT * FROM motivation;")
 rows = cursor.fetchall()
 for row in rows:
     print(row)

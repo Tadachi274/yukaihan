@@ -3,6 +3,21 @@ import sqlite3
 
 app = Flask(__name__)
 
+# 部署の順序を定義
+DEPARTMENT_ORDER = {
+    '演出': 0,
+    '舞台監督': 1,
+    '制作': 2,
+    '音響': 3,
+    '照明': 4,
+    '道具': 5,
+    '衣装': 6,
+    '宣伝美術': 7,
+    '広報': 8,
+    '映像': 9,
+    '新歓': 10
+}
+
 # オーダー表表示
 @app.route('/')
 def index():
@@ -10,8 +25,12 @@ def index():
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM players')
     players = cursor.fetchall()
+    
+    # プレイヤーリストを部署の順序でソート
+    sorted_players = sorted(players, key=lambda x: DEPARTMENT_ORDER.get(x[2], 999))
+    
     conn.close()
-    return render_template('index.html', players=players)
+    return render_template('index.html', players=sorted_players)
 
 # 選手追加ページ
 @app.route('/add', methods=['GET', 'POST'])
@@ -64,12 +83,21 @@ def player_detail(player_id):
             'その他': scores[5]
         }
     
+    # motivationテーブルから最新のスコアを取得
+    cursor.execute('''
+        SELECT score 
+        FROM motivation 
+        WHERE name = ? 
+        ORDER BY id DESC 
+        LIMIT 1
+    ''', (player[1],))
+    
+    motivation_score = cursor.fetchone()
+    motivation = motivation_score[0] if motivation_score else 50
+    
     conn.close()
-    return render_template('player_detail.html', player=player, player_data=player_data)
+    return render_template('player_detail.html', player=player, player_data=player_data, motivation=motivation)
 
-@app.route('/chart')
-def chart():
-    return render_template('chart1.html')
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -90,16 +118,15 @@ def submit():
         conn.commit()
     return jsonify(data)
 
-@app.route('/latest/<name>', methods=['GET'])
-def latest(name):
+@app.route('/save_motivation', methods=['POST'])
+def save_motivation():
+    data = request.json
     with sqlite3.connect("data.db") as conn:
         c = conn.cursor()
-        c.execute('''SELECT 部署, 役者, 大学, 他団体, バイト, その他 FROM busy_scores WHERE name = ? ORDER BY id DESC LIMIT 1''', (name,))
-        latest_data = c.fetchone()
-    if latest_data:
-        return jsonify({"部署": latest_data[0], "役者": latest_data[1], "大学": latest_data[2], "他団体": latest_data[3], "バイト": latest_data[4], "その他": latest_data[5]})
-    return jsonify({"部署": 1, "役者": 1, "大学": 1, "他団体": 1, "バイト": 1, "その他": 1})
-
+        c.execute('''INSERT INTO motivation (name, score) VALUES (?, ?)''',
+                 (data['name'], data['motivation']))
+        conn.commit()
+    return jsonify({"success": True})
 
 if __name__ == '__main__':
     app.run(debug=True)
