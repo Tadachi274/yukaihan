@@ -90,70 +90,132 @@
             display: flex;
             gap: 5px;
         }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
-    <h1>座組</h1>
-    <table border="1">
-        <tr>
-            <th>名前</th>
-            <th>部署</th>
-            <th>役</th>
-            <th>忙しさ</th>
-            <th>モチベ</th>
-        </tr>
-        {% for player in players %}
-        <tr>
-            <td>
-                <a href="{{ url_for('player_detail', player_id=player[0]) }}">
-                        <button>{{ player[1] }}</button>
-                </a>
-            </td>
-            <td>{{ player[2] }}</td>
-            <td>{{ player[3] }}</td>
-            <td class="emoji-cell">
-                {% set busy_score = player_stats[player[1]].busy_score %}
-                {% if busy_score > 4.5 %}
-                    😱
-                {% elif busy_score > 3.5 %}
-                    😨
-                {% elif busy_score > 2.5 %}
-                    😐
-                {% elif busy_score > 1.5 %}
-                    😊
-                {% else %}
-                    😄
-                {% endif %}
-            </td>
-            <td class="emoji-cell">
-                {% set motivation = player_stats[player[1]].motivation %}
-                {% if motivation > 80 %}
-                    🤩
-                {% elif motivation > 60 %}
-                    😊
-                {% elif motivation > 40 %}
-                    😐
-                {% elif motivation > 20 %}
-                    😕
-                {% elif motivation > 10 %}
-                    😢
-                {% else %}
-                    🥶
-                {% endif %}
-            </td>
-            <!--td>
-                <a href="{{ url_for('edit_player', player_id=player[0]) }}">
-                    <button>編集</button>
-                </a>
-            </td-->
-            <td>
-                <div class="action-buttons">
-                    <button class="delete-player" onclick="deletePlayer('{{ player[0] }}', '{{ player[1] }}')">削除</button>
-                </div>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <h1>劇団管理</h1>
+    
+    <div class="tab-buttons">
+        <button class="tab-button active" onclick="showContent('cast')">座組</button>
+        <button class="tab-button" onclick="showContent('department')">部署</button>
+    </div>
+
+    <div id="castContent" class="content-section active">
+        <h2>座組一覧</h2>
+        <table border="1">
+            <tr>
+                <th>名前</th>
+                <th>部署</th>
+                <th>役</th>
+                <th>忙しさ</th>
+                <th>モチベ</th>
+            </tr>
+            {% for player in players %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('player_detail', player_id=player[0]) }}">
+                            <button>{{ player[1] }}</button>
+                    </a>
+                </td>
+                <td>{{ player[2] }}</td>
+                <td>{{ player[3] }}</td>
+                <td class="emoji-cell">
+                    {% set busy_score = player_stats[player[1]].busy_score %}
+                    {% if busy_score > 4.5 %}
+                        😱
+                    {% elif busy_score > 3.5 %}
+                        😨
+                    {% elif busy_score > 2.5 %}
+                        😐
+                    {% elif busy_score > 1.5 %}
+                        😊
+                    {% else %}
+                        😄
+                    {% endif %}
+                </td>
+                <td class="emoji-cell">
+                    {% set motivation = player_stats[player[1]].motivation %}
+                    {% if motivation > 80 %}
+                        🤩
+                    {% elif motivation > 60 %}
+                        😊
+                    {% elif motivation > 40 %}
+                        😐
+                    {% elif motivation > 20 %}
+                        😕
+                    {% elif motivation > 10 %}
+                        😢
+                    {% else %}
+                        🥶
+                    {% endif %}
+                </td>
+                <!--td>
+                    <a href="{{ url_for('edit_player', player_id=player[0]) }}">
+                        <button>編集</button>
+                    </a>
+                </td-->
+                <td>
+                    <div class="action-buttons">
+                        <button class="delete-player" onclick="deletePlayer('{{ player[0] }}', '{{ player[1] }}')">削除</button>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div id="departmentContent" class="content-section">
+        <h2>部署別一覧</h2>
+        <table border="1">
+            <tr>
+                <th>部署</th>
+                <th>人数</th>
+                <th>メンバー</th>
+            </tr>
+            {% for dept, members in players|groupby('2') %}
+            <tr>
+                <td>{{ dept }}</td>
+                <td>{{ members|length }}</td>
+                <td>
+                    {% for member in members %}
+                    <a href="{{ url_for('player_detail', player_id=member[0]) }}">
+                        {{ member[1] }}{% if not loop.last %}, {% endif %}
+                    </a>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
     <br>
     <a href="{{ url_for('add_player') }}">選手を追加</a>
 
@@ -167,6 +229,26 @@
                 .then(() => {
                     location.reload();
                 });
+            }
+        }
+
+        function showContent(contentType) {
+            // すべてのコンテンツを非表示
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            // すべてのタブボタンから active クラスを削除
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // 選択されたコンテンツを表示
+            if (contentType === 'cast') {
+                document.getElementById('castContent').classList.add('active');
+                document.querySelector('.tab-button:first-child').classList.add('active');
+            } else {
+                document.getElementById('departmentContent').classList.add('active');
+                document.querySelector('.tab-button:last-child').classList.add('active');
             }
         }
     </script>
