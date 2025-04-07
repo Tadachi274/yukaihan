@@ -8,7 +8,9 @@ def init_db():
         CREATE TABLE IF NOT EXISTS players (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
-            position TEXT NOT NULL
+            position TEXT NOT NULL,
+            role TEXT NOT NULL,
+
         )
     ''')
     conn.commit()

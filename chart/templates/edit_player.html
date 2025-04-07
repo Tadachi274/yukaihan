@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>参加者を追加</title>
+    <title>参加者情報を編集</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -69,33 +69,23 @@
     </style>
 </head>
 <body>
-    <h1>参加者を追加</h1>
-    <form action="{{ url_for('add_player') }}" method="post">
+    <h1>{{ player[1] }}の情報を編集</h1>
+    <form action="{{ url_for('edit_player', player_id=player[0]) }}" method="post">
         <label for="name">名前:</label>
-        <input type="text" name="name" required>
-        <br>
+        <input type="text" name="name" value="{{ player[1] }}" required>
+        
         <label for="position">部署:</label>
         <select id="position" name="position">
-            <option value="演出">演出</option>
-            <option value="舞台監督" selected>舞台監督</option>
-            <option value="制作">制作</option>
-            <option value="音響">音響</option>
-            <option value="照明">照明</option>
-            <option value="道具">道具</option>
-            <option value="衣装">衣装</option>
-            <option value="宣伝美術">宣伝美術</option>
-            <option value="広報">広報</option>
-            <option value="映像">映像</option>
-            <option value="新歓">新歓</option>
-            <option value="その他">その他</option>
+            {% for dept in ['演出', '舞台監督', '制作', '音響', '照明', '道具', '衣装', '宣伝美術', '広報', '映像', '新歓', 'その他'] %}
+            <option value="{{ dept }}" {% if dept == player[2] %}selected{% endif %}>{{ dept }}</option>
+            {% endfor %}
         </select>
-        <br>
-        <label for="role">役：</label>
-        <input type="text" name="role" required>  <!-- nameをroleに修正 -->
-        <br>
-        <button type="submit">追加</button>
+        
+        <label for="role">役:</label>
+        <input type="text" name="role" value="{{ player[3] }}" required>
+        
+        <button type="submit">更新</button>
     </form>
-    <br>
     <a href="{{ url_for('index') }}">戻る</a>
 </body>
 </html>

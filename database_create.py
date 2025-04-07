@@ -8,12 +8,12 @@ cursor = conn.cursor()
 cursor.execute("DROP TABLE IF EXISTS players")
 
 # 新しいテーブルを作成
-cursor.execute('''CREATE TABLE IF NOT EXISTS players (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT,
-                        position TEXT,
-                        role TEXT
-                    )''')
+cursor.execute('''        CREATE TABLE IF NOT EXISTS players (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            position TEXT NOT NULL,
+            role TEXT NOT NULL);
+''')
 
 # 変更を保存
 conn.commit()

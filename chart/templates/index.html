@@ -69,6 +69,27 @@
         a[href$="add_player"]:hover {
             text-decoration: underline;
         }
+
+        .emoji-cell {
+            font-size: 24px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .delete-player {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .delete-player:hover {
+            background-color: #c82333;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
     </style>
 </head>
 <body>
@@ -85,15 +106,69 @@
         <tr>
             <td>
                 <a href="{{ url_for('player_detail', player_id=player[0]) }}">
-                    <button>{{ player[1] }}</button>
+                        <button>{{ player[1] }}</button>
                 </a>
             </td>
             <td>{{ player[2] }}</td>
             <td>{{ player[3] }}</td>
+            <td class="emoji-cell">
+                {% set busy_score = player_stats[player[1]].busy_score %}
+                {% if busy_score > 4.5 %}
+                    😱
+                {% elif busy_score > 3.5 %}
+                    😨
+                {% elif busy_score > 2.5 %}
+                    😐
+                {% elif busy_score > 1.5 %}
+                    😊
+                {% else %}
+                    😄
+                {% endif %}
+            </td>
+            <td class="emoji-cell">
+                {% set motivation = player_stats[player[1]].motivation %}
+                {% if motivation > 80 %}
+                    🤩
+                {% elif motivation > 60 %}
+                    😊
+                {% elif motivation > 40 %}
+                    😐
+                {% elif motivation > 20 %}
+                    😕
+                {% elif motivation > 10 %}
+                    😢
+                {% else %}
+                    🥶
+                {% endif %}
+            </td>
+            <!--td>
+                <a href="{{ url_for('edit_player', player_id=player[0]) }}">
+                    <button>編集</button>
+                </a>
+            </td-->
+            <td>
+                <div class="action-buttons">
+                    <button class="delete-player" onclick="deletePlayer('{{ player[0] }}', '{{ player[1] }}')">削除</button>
+                </div>
+            </td>
         </tr>
         {% endfor %}
     </table>
     <br>
     <a href="{{ url_for('add_player') }}">選手を追加</a>
+
+    <script>
+        function deletePlayer(playerId, playerName) {
+            if (confirm(`${playerName}を削除してもよろしいですか？\n関連するすべてのデータ（タスク、モチベーション、忙しさスコア）も削除されます。`)) {
+                fetch(`/delete_player/${playerId}`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(() => {
+                    location.reload();
+                });
+            }
+        }
+    </script>
 </body>
 </html>
