@@ -73,13 +73,25 @@ def index():
 @app.route('/add', methods=['GET', 'POST'])
 def add_player():
     if request.method == 'POST':
+        print(request.form)
         name = request.form['name']
         position = request.form['position']
-        role = request.form['role']  
+        role = request.form['role'] 
+        chief = request.form['chief'] 
+        
         conn = sqlite3.connect('data.db')
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO players (name, position, role) VALUES (?, ?, ?)', 
-                      (name, position, role))  
+
+        # 名前の重複をチェック
+        cursor.execute('SELECT COUNT(*) FROM players WHERE name = ?', (name,))
+        if cursor.fetchone()[0] > 0:
+            conn.close()
+            error_message = f"名前 '{name}' は既に使用されています。別の名前を入力してください。"
+            return render_template('add_player.html', error_message=error_message)
+        
+
+        cursor.execute('INSERT INTO players (name, position, role, chief) VALUES (?, ?, ?, ?)', 
+                      (name, position, role, chief))  
         conn.commit()
         conn.close()
         return redirect(url_for('index'))
@@ -147,6 +159,55 @@ def player_detail(player_id):
                          player_data=player_data, 
                          motivation=motivation,
                          tasks=tasks)
+
+#部署ページ
+@app.route('/position/<string:position>')
+def position_page(position):
+    conn = sqlite3.connect('data.db')
+    cursor = conn.cursor()
+    
+    # プレイヤー基本情報の取得
+    cursor.execute('SELECT * FROM players WHERE position = ?', (position,))
+    players = cursor.fetchall()
+    
+    # 各プレイヤーの忙しさとモチベーションデータを取得
+    player_stats = {}
+    for player in players:
+        # 忙しさスコアの取得
+        cursor.execute('''
+            SELECT 部署, 役者, 大学, 他団体, バイト, その他 
+            FROM busy_scores 
+            WHERE name = ? 
+            ORDER BY id DESC 
+            LIMIT 1
+        ''', (player[1],))
+        busy_score = cursor.fetchone()
+        
+        # モチベーションスコアの取得
+        cursor.execute('''
+            SELECT score 
+            FROM motivation 
+            WHERE name = ? 
+            ORDER BY id DESC 
+            LIMIT 1
+        ''', (player[1],))
+        motivation_score = cursor.fetchone()
+        
+        # 平均忙しさを計算
+        if busy_score:
+            avg_busy = sum(busy_score) / len(busy_score)
+        else:
+            avg_busy = 0
+            
+        player_stats[player[1]] = {
+            'busy_score': avg_busy,
+            'motivation': motivation_score[0] if motivation_score else 50
+        }
+
+    sorted_players = sorted(players, key=lambda x: (x[3] == "なし", x[3] if x[3] != "なし" else ""))
+    
+    conn.close()
+    return render_template('position.html', position=position, players=sorted_players, player_stats=player_stats)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -238,12 +299,13 @@ def edit_player(player_id):
         name = request.form['name']
         position = request.form['position']
         role = request.form['role']
+        chief = request.form['chief']
         
         cursor.execute('''
             UPDATE players 
-            SET name = ?, position = ?, role = ? 
+            SET name = ?, position = ?, role = ? , chief = ?
             WHERE id = ?
-        ''', (name, position, role, player_id))
+        ''', (name, position, role, chief, player_id))
         conn.commit()
         conn.close()
         return redirect(url_for('index'))

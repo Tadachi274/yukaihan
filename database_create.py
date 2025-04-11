@@ -12,6 +12,7 @@ cursor.execute('''        CREATE TABLE IF NOT EXISTS players (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             position TEXT NOT NULL,
+            chief TEXT NOT NULL,
             role TEXT NOT NULL);
 ''')
 

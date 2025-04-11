@@ -70,6 +70,14 @@
 </head>
 <body>
     <h1>参加者を追加</h1>
+
+    <!-- エラーメッセージを表示 -->
+    {% if error_message %}
+    <div style="color: red; margin-bottom: 10px;">
+        {{ error_message }}
+    </div>
+    {% endif %}
+    
     <form action="{{ url_for('add_player') }}" method="post">
         <label for="name">名前:</label>
         <input type="text" name="name" required>
@@ -88,10 +96,28 @@
             <option value="映像">映像</option>
             <option value="新歓">新歓</option>
             <option value="その他">その他</option>
+            <option value="なし">なし</option>
+        </select>
+        <br>
+        <label for="chief">チーフ</label>
+        <select id="chief" name="chief">
+            <option value="演出C">演出チーフ</option>
+            <option value="舞台監督C" selected>舞台監督チーフ</option>
+            <option value="制作C">制作チーフ</option>
+            <option value="音響C">音響チーフ</option>
+            <option value="照明C">照明チーフ</option>
+            <option value="道具C">道具チーフ</option>
+            <option value="衣装C">衣装チーフ</option>
+            <option value="宣伝美術C">宣伝美術チーフ</option>
+            <option value="広報C">広報チーフ</option>
+            <option value="映像C">映像チーフ</option>
+            <option value="新歓C">新歓チーフ</option>
+            <option value="その他C">その他チーフ</option>
+            <option value="None">なし</option>
         </select>
         <br>
         <label for="role">役：</label>
-        <input type="text" name="role" required>  <!-- nameをroleに修正 -->
+        <input type="text" name="role" required>  
         <br>
         <button type="submit">追加</button>
     </form>
